@@ -217,8 +217,19 @@ function buildInvoicePdfBlob_() {
   return resp.getBlob();
 }
 
+function getOrCreateLogSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let log = ss.getSheetByName(SHEET_LOG);
+  if (log) return log;
+  log = ss.insertSheet(SHEET_LOG);
+  log.getRange(1, 1, 1, 6).setValues([["Invoice No.", "Date Generated", "Client", "Total (AED)", "Status", "PDF Link"]]);
+  log.getRange(1, 1, 1, 6).setFontWeight("bold").setFontColor("#FFFFFF").setBackground("#1F3864");
+  log.setFrozenRows(1);
+  return log;
+}
+
 function logInvoice_(invoiceNo, client, total, status, link) {
-  const log = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LOG);
+  const log = getOrCreateLogSheet_();
   const data = log.getDataRange().getValues();
   for (let r = 1; r < data.length; r++) {
     if (String(data[r][0]) === invoiceNo) {
@@ -336,7 +347,7 @@ function markPaid() {
   const client = extractClientName_(sheet);
   const total = sheet.getRange(CELL_TOTAL).getValue();
   if (invoiceNo && invoiceNo.indexOf("[") === -1) {
-    const log = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LOG);
+    const log = getOrCreateLogSheet_();
     const data = log.getDataRange().getValues();
     let found = false;
     for (let r = 1; r < data.length; r++) {
@@ -348,5 +359,5 @@ function markPaid() {
 }
 
 function openLog() {
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_LOG).activate();
+  getOrCreateLogSheet_().activate();
 }
