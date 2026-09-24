@@ -1,0 +1,15 @@
+{
+  "name": "qflow-apps-script-deploy",
+  "private": true,
+  "version": "1.0.0",
+  "description": "clasp tooling to push the Invoice Tools and Swimlane Generator Apps Script projects without copy-paste.",
+  "devDependencies": {
+    "@google/clasp": "^2.4.2"
+  },
+  "scripts": {
+    "login": "clasp login",
+    "push:invoice": "cd Templates/apps-script-invoice && clasp push --force",
+    "push:swimlane": "cd Templates/apps-script-swimlane && clasp push --force",
+    "push:all": "npm run push:invoice && npm run push:swimlane"
+  }
+}

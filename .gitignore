@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
+
+# clasp — scriptId is fine to share, but never commit the OAuth token
+.clasprc.json
+Templates/apps-script-*/.clasp.json

@@ -1,0 +1,54 @@
+name: Deploy Apps Script
+
+# Pushes Templates/apps-script-invoice and Templates/apps-script-swimlane to
+# their live Apps Script projects whenever code changes land on main —
+# no manual copy-paste into the Apps Script editor ever again.
+#
+# One-time setup (see README.md "Deploying via GitHub" for the full walkthrough):
+#   1. Locally: npm install -g @google/clasp && clasp login
+#   2. Copy the contents of ~/.clasprc.json into a repo secret named CLASP_CREDENTIALS
+#      (Settings > Secrets and variables > Actions > New repository secret).
+#   3. Add two repo variables (Settings > Secrets and variables > Actions > Variables):
+#      INVOICE_SCRIPT_ID and SWIMLANE_SCRIPT_ID — the Script ID from each
+#      Apps Script project's Project Settings page.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Templates/apps-script-invoice/**"
+      - "Templates/apps-script-swimlane/**"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Restore clasp credentials
+        run: echo '${{ secrets.CLASP_CREDENTIALS }}' > ~/.clasprc.json
+
+      - name: Write .clasp.json for each project
+        run: |
+          echo '{"scriptId":"${{ vars.INVOICE_SCRIPT_ID }}","rootDir":"."}' \
+            > Templates/apps-script-invoice/.clasp.json
+          echo '{"scriptId":"${{ vars.SWIMLANE_SCRIPT_ID }}","rootDir":"."}' \
+            > Templates/apps-script-swimlane/.clasp.json
+
+      - name: Push Invoice Tools
+        if: vars.INVOICE_SCRIPT_ID != ''
+        working-directory: Templates/apps-script-invoice
+        run: clasp push --force
+
+      - name: Push Swimlane Generator
+        if: vars.SWIMLANE_SCRIPT_ID != ''
+        working-directory: Templates/apps-script-swimlane
+        run: clasp push --force
